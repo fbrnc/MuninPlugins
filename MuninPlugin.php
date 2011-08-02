@@ -5,24 +5,24 @@
  * @author Fabrizio Branca
  */
 abstract class MuninPlugin {
-	
+
 	const GRAPH_GAUGE = 'GAUGE';
 	const DRAW_LINE1 = 'LINE1';
-	
+
 	/**
 	 * @var int cachetime in minutes.
 	 */
 	protected $cacheTime = 0;
-	
+
 	/**
 	 * Process
-	 * 
+	 *
 	 * @param array $argv
 	 * @return void
 	 */
 	public function process($argv) {
 		// logging (for debugging purposes)
-		file_put_contents(sys_get_temp_dir() . '/' . get_class($this) . '.log', date('Y-m-d H:i:s') . ' ' . var_export($argv, 1) . "\n", FILE_APPEND);		
+		file_put_contents(sys_get_temp_dir() . '/' . get_class($this) . '.log', date('Y-m-d H:i:s') . ' ' . var_export($argv, 1) . "\n", FILE_APPEND);
 
 		if (isset($argv[1]) && $argv[1] == "autoconf") {
 			$this->autoconf();
@@ -32,19 +32,19 @@ abstract class MuninPlugin {
 			$this->printValues();
 		}
 	}
-	
+
 	/**
 	 * Autoconf
-	 * 
+	 *
 	 * @return void
 	 */
 	public function autoconf() {
 		echo "yes\n";
 	}
-	
+
 	/**
 	 * Config
-	 * 
+	 *
 	 * @return void
 	 */
 	public function config() {
@@ -57,10 +57,10 @@ abstract class MuninPlugin {
 			}
 		}
 	}
-	
+
 	/**
 	 * Print values
-	 * 
+	 *
 	 * @return void
 	 */
 	public function printValues() {
@@ -68,19 +68,19 @@ abstract class MuninPlugin {
 			echo "$graph.value $value\n";
 		}
 	}
-	
+
 	/**
 	 * Get values.
 	 * Wraps _getValues() that must be implemented in your inheriting class and takes care of caching
-	 * 
-	 * @return array 
+	 *
+	 * @return array
 	 */
 	protected function getValues() {
-		
+
 		if (empty($this->cacheTime)) { // caching is disabled
 			return $this->_getValues();
 		}
-		
+
 		$cacheFile = sys_get_temp_dir() . '/Munin_' . get_class($this) . '_' . md5(serialize($this->getSetup())) . '_' . md5(serialize($this->getGraphs())) . '.cache';
 		if (is_file($cacheFile)) {
 			if (filemtime($cacheFile) >= (time() - $this->cacheTime * 60)) {
@@ -95,31 +95,41 @@ abstract class MuninPlugin {
 		chmod($cacheFile, 0666);
 		return $values;
 	}
-	
+
+	/**
+	 * Normalize field name
+	 *
+	 * @param string $fieldname
+	 * @return string
+	 */
+	protected function normalizeFieldName($fieldname) {
+		return preg_replace('/[^A-Za-z0-9]/', '_', $fieldname);
+	}
+
 	/**
 	 * Retrieve actual values.
 	 * This must be implemented in your inheriting class
-	 * 
+	 *
 	 * @return array
 	 */
 	abstract protected function _getValues();
-	
+
 	/**
 	 * Get graphs.
-	 * Expects information on the graphs to be displayed. 
+	 * Expects information on the graphs to be displayed.
 	 * Format
 	 * array(<GraphName> => array(<GraphConfiguration> => <ConfigurationValue>, ...), ... )
-	 * 
+	 *
 	 * @return array
 	 */
 	abstract protected function getGraphs();
-	
+
 	/**
 	 * Get setup
 	 * Expects rrdtool configuration
-	 * 
+	 *
 	 * @return array
 	 */
 	abstract protected function getSetup();
-	
+
 }
