@@ -37,10 +37,10 @@ class DirSize extends MuninPlugin {
 				// "second" or "minute" @see http://munin-monitoring.org/wiki/graph_period
 			'graph_period' => 'minute',
 				// "yes" or "no" @see http://munin-monitoring.org/wiki/graph_scale
-			'graph_scale' => 'no',
+			'graph_scale' => 'yes',
 			'graph_vlabel' => 'Bytes',
 				// @see http://munin-monitoring.org/wiki/graph_args
-			'graph_args' => '--base 1024 -l 1',
+			'graph_args' => '--base 1024',
 			'graph_info' => 'This graph shows the size of several directories'
 		);
 	}
